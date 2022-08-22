@@ -1,14 +1,14 @@
 import React, { useState,useContext } from 'react'
-import { View, TextInput, StyleSheet, Text, Pressable } from "react-native"
+import { View, TextInput, StyleSheet, Text, Pressable ,Keyboard } from "react-native"
 import { firebase } from './config'
 import { useNavigation } from '@react-navigation/native';
 import { IconButton } from '../components';
 import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
-const Detail = ({route}) => {
+const AddHackathon = () => {
     const todoRef = firebase.firestore().collection('hackathon');
-    const [title, onChangeTitle] = useState(route.params.item?.title);
-    const [description, onChangeDescription] = useState(route.params.item.description);
-    const [tags, onChangeTags] = useState(route.params.item.tags);
+    const [title, onChangeTitle] = useState();
+    const [description, onChangeDescription] = useState();
+    const [tags, onChangeTags] = useState();
     const navigation = useNavigation();
     const { user } = useContext(AuthenticatedUserContext);
     const handleSignOut = async () => {
@@ -16,34 +16,44 @@ const Detail = ({route}) => {
 
     };
     const updateTodo = () => {
-        if (title && description && tags) {
-            const timestamp = firebase.firestore.FieldValue.serverTimestamp();
-            const data = {
-                title: title,
-                description: description,
-                tags: tags,
-                createdAt: timestamp
-            };
-            todoRef
-            .doc(route.params.item.id)
-            .update(data).then(() => {
-                navigation.navigate("Home")
-            }).catch((error) => {
-                alert(error.message)
+       // check if we have a todo.
+       if (title && description && tags) {
+        // get the timestamp
+        const timestamp = firebase.firestore.FieldValue.serverTimestamp();
+        const data = {
+            title: title,
+            description: description,
+            tags: tags,
+            createdAt: timestamp
+        };
+        todoRef
+            .add(data)
+            .then(() => {
+                // release todo state
+                onChangeTitle('');
+                onChangeDescription(''),
+                onChangeTags('');
+                navigation.goBack()
+                // release keyboard
+                Keyboard.dismiss();
             })
-        }   
+            .catch((error) => {
+                // show an alert in case of error
+                alert(error);
+            })
+    }   
     }
 
     return (
         <>
           <View style={styles.row}>
         <Text style={styles.title}>Update content!</Text>
-      
+        
       </View>
         
         <View style={styles.container}>
              
-        <TextInput 
+            <TextInput 
                 style={styles.textfield}
                 onChangeText={onChangeTitle}
                 value={title}
@@ -64,7 +74,7 @@ const Detail = ({route}) => {
             <Pressable 
                 style={styles.buttonUpdate}
                 onPress={() => {updateTodo()}}>
-                <Text>UPDATE USER</Text>
+                <Text>UPDATE HACKATHON</Text>
             </Pressable>
         </View>
         </>
@@ -96,9 +106,8 @@ const styles = StyleSheet.create({
         backgroundColor: '#0de065',
     },
     row: {
-
-        height:100,
-        marginTop:10,
+        height:80,
+        // marginTop:10,
         flexDirection: 'row',
         justifyContent: 'center',
         alignItems: 'center',
@@ -112,4 +121,4 @@ const styles = StyleSheet.create({
       },
 });
 
-export default Detail
+export default AddHackathon
