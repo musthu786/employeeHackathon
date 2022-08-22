@@ -1,11 +1,12 @@
 import React, { useState,useContext } from 'react'
-import { View, TextInput, StyleSheet, Text, Pressable } from "react-native"
+import { View, TextInput, StyleSheet, Text, Pressable,ActivityIndicator } from "react-native"
 import { firebase } from './config'
 import { useNavigation } from '@react-navigation/native';
 import { IconButton } from '../components';
 import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
 const Detail = ({route}) => {
     const todoRef = firebase.firestore().collection('hackathon');
+    const [updating, onUpdating] = useState(false);
     const [title, onChangeTitle] = useState(route.params.item?.title);
     const [description, onChangeDescription] = useState(route.params.item.description);
     const [tags, onChangeTags] = useState(route.params.item.tags);
@@ -16,6 +17,7 @@ const Detail = ({route}) => {
 
     };
     const updateTodo = () => {
+        onUpdating(true)
         if (title && description && tags) {
             const timestamp = firebase.firestore.FieldValue.serverTimestamp();
             const data = {
@@ -27,8 +29,10 @@ const Detail = ({route}) => {
             todoRef
             .doc(route.params.item.id)
             .update(data).then(() => {
+                onUpdating(false)
                 navigation.navigate("Home")
             }).catch((error) => {
+                onUpdating(false)
                 alert(error.message)
             })
         }   
@@ -61,11 +65,15 @@ const Detail = ({route}) => {
                 value={tags}
                 placeholder="Tags"
             />
-            <Pressable 
-                style={styles.buttonUpdate}
-                onPress={() => {updateTodo()}}>
-                <Text>UPDATE USER</Text>
-            </Pressable>
+             {!updating ? (
+                   <Pressable 
+                   style={styles.buttonUpdate}
+                   onPress={() => {updateTodo()}}>
+                   <Text>UPDATE Hackathon</Text>
+               </Pressable> 
+                ) : (
+                    <ActivityIndicator size="large" color="#00ff00" />
+                )}
         </View>
         </>
     )
