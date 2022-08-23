@@ -1,11 +1,12 @@
-import { View, Text, FlatList, StyleSheet, Pressable, TextInput, TouchableOpacity, Keyboard } from 'react-native'
+import { View, Text, FlatList, StyleSheet, Pressable,  TouchableOpacity, } from 'react-native'
 import React, { useState, useEffect, useContext } from 'react'
 import Firebase from '../config/firebase';
 import { firebase } from './config'
-import { FontAwesome ,AntDesign } from "@expo/vector-icons";
+import { FontAwesome, AntDesign } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
-
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
+import { StatusBar } from 'expo-status-bar';
 const auth = Firebase.auth();
 const HomeScreen = () => {
   const [todos, setTodos] = useState([]);
@@ -16,13 +17,7 @@ const HomeScreen = () => {
   const navigation = useNavigation();
 
   const { user } = useContext(AuthenticatedUserContext);
-  const handleSignOut = async () => {
-    try {
-      await auth.signOut();
-    } catch (error) {
-      console.log(error);
-    }
-  };
+
 
   // fetch or read the data from firestore
   useEffect(() => {
@@ -33,21 +28,21 @@ const HomeScreen = () => {
           const todos = []
           querySnapshot.forEach((doc) => {
             // alert(doc)
-            const { title, description, tags, timestamp ,user ,like} = doc.data()
+            const { title, description, tags, timestamp, user, like, createdAt, date } = doc.data()
+
             todos.push({
               id: doc.id,
               title: title,
               description: description,
               tags: tags,
-              createdAt: timestamp,
-              user:user,
-              like:like,
-              // liked: 'false'
+              createdAt: createdAt?.toDate(),
+              user: user,
+              like: like,
             })
           })
 
           setTodos(todos)
-       
+
         })
   }, [])
 
@@ -67,27 +62,27 @@ const HomeScreen = () => {
   }
 
   // like a todo from firestore db
-  const likeTodo = (data,like,type) => {
+  const likeTodo = (data, like, type,value) => {
 
     console.log(like, 'like value')
+
+    // //Find index of specific object using findIndex method.    
+    // objIndex = todos.findIndex((obj => data.id == obj.id));
+
+    // if(like === undefined){
+    //   todos[objIndex]?.liked = true
+    // }
+    // else{
+    //   todos[objIndex]?.liked = !like
+    // }
+
+
+    // setTodosExtra(todos)
     
-//Find index of specific object using findIndex method.    
-objIndex = todos.findIndex((obj => data.id == obj.id));
-
-//Log object to Console.
-console.log("Before update: ", todos[objIndex])
-
-//Update object's name property.
-todos[objIndex].liked = like === undefined ? true : !like
-
-//Log object to console again.
-console.log("After update: ", todos)
-setTodosExtra(todos)
-setTodos(todos)
     todoRef
-      .doc(todos.id)
+      .doc(data.id)
       .update({
-        like : like + 1
+        like: value + 1
       })
       .then(() => {
         // show a successful alert
@@ -99,20 +94,63 @@ setTodos(todos)
       })
   }
 
+  // delete a todo from firestore db
+  const sort = (type) => {
+    todoRef
+      .orderBy(type === 3 ? 'like' : 'createdAt', type === 3 ? 'desc' :  type === 1 ? 'desc' : 'asc')
+      .onSnapshot(
+        querySnapshot => {
+          const todos = []
+          querySnapshot.forEach((doc) => {
+            const { title, description, tags, user, like, createdAt } = doc.data()
+
+            todos.push({
+              id: doc.id,
+              title: title,
+              description: description,
+              tags: tags,
+              createdAt: createdAt.toDate(),
+              user: user,
+              like: like,
+            })
+          })
+
+          setTodos(todos)
+
+        })
+  }
+
+
+
 
 
 
 
   return (
     <View style={{ flex: 1 }}>
+      <StatusBar style='light' />
       <View style={styles.row}>
         <Text style={styles.title}>Welcome {user.email.replace(/@gmail.com/, "").toUpperCase()} !</Text>
       </View>
 
-      <TouchableOpacity onPress={() => navigation.navigate('AddHackathon')} style={{ height: 40, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10 }}>
-        {/* <Text>Click here to add hackathons</Text> */}
-        <View style={{ height: 50, width: 300, borderRadius: 10, backgroundColor: 'grey', justifyContent: 'center', alignItems: 'center' }}>
-          <Text style={{ color: 'white' }}>Click here to add hackathons</Text>
+      <TouchableOpacity onPress={() => navigation.navigate('AddHackathon')} style={{ height: hp(5), width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: hp(1) }}>
+        <View style={{ height: hp(5), width: wp('80%'), borderRadius: hp(2),elevation:5, backgroundColor: '#42855B', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white',fontSize:20 }}>Add hackathons</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => sort(1)} style={{ height: 40, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
+      <View style={{ height: hp(5), width: wp('80%'), borderRadius: hp(2),elevation:5, backgroundColor: '#D2D79F', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white',fontSize:20 }}>Sort Newest</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => sort(2)} style={{ height: 40, width: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
+      <View style={{ height: hp(5), width: wp('80%'), borderRadius: hp(2),elevation:5, backgroundColor: '#D2D79F', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white',fontSize:20 }}>Sort Oldest</Text>
+        </View>
+      </TouchableOpacity>
+      <TouchableOpacity onPress={() => sort(3)} style={{ height: 40, widwhiteth: '100%', justifyContent: 'center', alignItems: 'center', marginBottom: 10, marginTop: 10 }}>
+      <View style={{ height: hp(5), width: wp('80%'), borderRadius: hp(2),elevation:5, backgroundColor: '#D2D79F', justifyContent: 'center', alignItems: 'center' }}>
+          <Text style={{ color: 'white',fontSize:20 }}>Sort Most Liked</Text>
         </View>
       </TouchableOpacity>
       <FlatList
@@ -121,38 +159,36 @@ setTodos(todos)
         extraData={todosExtra}
         numColumns={1}
         renderItem={({ item }) => (
-             
           <>
             <Pressable
               style={styles.container}
-              onPress={() => navigation.navigate('Detail', { item })}
+              onPress={() =>  item?.user === String(user.email) && navigation.navigate('Detail', { item })}
             >
-
               <View style={{ width: '100%', flexDirection: 'row' }}>
-                <View style={{ width: '50%', justifyContent: 'flex-start', alignItems: 'flex-start',flexDirection:'row' }}>
-                  {item?.user === String(user.email)  &&(
+                <View style={{ width: '50%', justifyContent: 'flex-start', alignItems: 'flex-start', flexDirection: 'row' }}>
+                  {item?.user === String(user.email) && (
                     <FontAwesome name="trash-o"
-                    color="red"
-                    onPress={() => deleteTodo(item)}
-                    style={styles.todoIcon} />
+                      color="red"
+                      onPress={() => deleteTodo(item)}
+                      style={styles.todoIcon} />
                   )}
-                 
-              
+
+
                 </View>
-               
-                <View style={{ width: '50%',  justifyContent: 'flex-start', alignItems: 'flex-end' }}>
-                   <>
-                    <AntDesign onPress={() =>   likeTodo(item,item?.liked, item?.liked ? 'unlike' :'like') } name="like1" size={24} color={item?.liked ? "blue" : "white"} style={styles.todoIcon} />
+
+                <View style={{ width: '50%', justifyContent: 'flex-start', alignItems: 'flex-end' }}>
+                  <>
+                    <AntDesign onPress={() => likeTodo(item, item?.liked, item?.liked ? 'unlike' : 'like',item?.like)} name="like1" size={24} color={item?.liked ? "blue" : "white"} style={styles.todoIcon} />
                     <Text>{item?.like} Likes</Text>
-                    </>
-                 
+                  </>
+
                 </View>
               </View>
               <View style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
-                    <Text style={styles.itemFeature}>
-                      {item?.tags}
-                    </Text>
-                  </View>
+                <Text style={styles.itemFeature}>
+                  {item?.tags}
+                </Text>
+              </View>
 
               <Text style={styles.itemtitle}>
                 {item?.title}
@@ -160,9 +196,6 @@ setTodos(todos)
               <Text style={styles.itemHeading}>
                 {item?.description}
               </Text>
-
-
-
             </Pressable>
           </>
 

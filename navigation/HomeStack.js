@@ -44,8 +44,44 @@ export default function HomeStack() {
           },
         }}
       />
-      <Stack.Screen name='Detail' component={Detail} />
-      <Stack.Screen name='AddHackathon' component={AddHackathon} />
+      <Stack.Screen name='Detail' component={Detail} options={{
+          headerRight: () => (
+            <Button
+              onPress={() => handleSignOut()}
+              title="Logout"
+              color="blue"
+            />
+          ),
+          headerRightContainerStyle:{
+            marginRight:20
+          },
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }} />
+      <Stack.Screen name='AddHackathon' component={AddHackathon} options={{
+          headerRight: () => (
+            <Button
+              onPress={() => handleSignOut()}
+              title="Logout"
+              color="blue"
+            />
+          ),
+          headerRightContainerStyle:{
+            marginRight:20
+          },
+          headerStyle: {
+            backgroundColor: '#f4511e',
+          },
+          headerTintColor: '#fff',
+          headerTitleStyle: {
+            fontWeight: 'bold',
+          },
+        }} />
     </Stack.Navigator>
   );
 }

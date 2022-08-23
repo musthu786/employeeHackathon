@@ -2,10 +2,9 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import { useState } from 'react';
 import { StyleSheet, Text, View, Button as RNButton } from 'react-native';
-
 import { Button, InputField, ErrorMessage } from '../components';
 import Firebase from '../config/firebase';
-
+import {widthPercentageToDP as wp, heightPercentageToDP as hp} from 'react-native-responsive-screen';
 const auth = Firebase.auth();
 
 export default function LoginScreen({ navigation }) {
@@ -37,7 +36,7 @@ export default function LoginScreen({ navigation }) {
 
   return (
     <View style={styles.container}>
-      <StatusBar style='dark-content' />
+      <StatusBar style='light' />
       <Text style={styles.title}>Login</Text>
       <InputField
         inputStyle={{
@@ -78,18 +77,18 @@ export default function LoginScreen({ navigation }) {
       {loginError ? <ErrorMessage error={loginError} visible={true} /> : null}
       <Button
         onPress={onLogin}
-        backgroundColor='#f57c00'
+        backgroundColor='#A63EC5'
         title='Login'
         tileColor='#fff'
         titleSize={20}
         containerStyle={{
-          marginBottom: 24
+          marginBottom: hp(2)
         }}
       />
       <RNButton
         onPress={() => navigation.navigate('Signup')}
         title='Go to Signup'
-        color='#fff'
+        color='#3D087B'
       />
     </View>
   );
@@ -98,15 +97,15 @@ export default function LoginScreen({ navigation }) {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#e93b81',
-    paddingTop: 50,
-    paddingHorizontal: 12
+    backgroundColor: '#003865',
+    paddingTop: hp(20),
+    paddingHorizontal: hp(2)
   },
   title: {
     fontSize: 24,
     fontWeight: '600',
     color: '#fff',
     alignSelf: 'center',
-    paddingBottom: 24
+    paddingBottom: hp(2)
   }
 });

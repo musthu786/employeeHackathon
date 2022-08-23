@@ -1,8 +1,9 @@
 import React, { useState, useContext } from 'react'
-import { View, TextInput, StyleSheet, Text, Pressable, Keyboard, ActivityIndicator, } from "react-native"
+import { View, TextInput, StyleSheet, Text, Pressable, Keyboard, ActivityIndicator,ScrollView } from "react-native"
 import { firebase } from './config'
 import { useNavigation } from '@react-navigation/native';
 import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
+import { StatusBar } from 'expo-status-bar';
 const AddHackathon = () => {
     const todoRef = firebase.firestore().collection('hackathon');
     const [updating, onUpdating] = useState(false);
@@ -14,26 +15,26 @@ const AddHackathon = () => {
 
     const Pretags = [
         {
-          id:0,
-          name:'Tech'
+            id: 0,
+            name: 'Tech'
         },
         {
-           id:1,
-            name:'Feature'
+            id: 1,
+            name: 'Feature'
         },
         {
-            id:2,
-            name:'Javascript'
+            id: 2,
+            name: 'Javascript'
         },
         {
-            id:3,
+            id: 3,
             name: 'Java'
         },
-        
 
-]
 
-    
+    ]
+
+
 
     const updateTodo = () => {
         onUpdating(true)
@@ -47,7 +48,7 @@ const AddHackathon = () => {
                 tags: tags,
                 user: user.email,
                 createdAt: timestamp,
-                like: 0
+                like: 0,
             };
             todoRef
                 .add(data)
@@ -71,6 +72,7 @@ const AddHackathon = () => {
 
     return (
         <>
+            <StatusBar style='light' />
             <View style={styles.row}>
                 <Text style={styles.title}>Update content!</Text>
 
@@ -98,17 +100,26 @@ const AddHackathon = () => {
                     value={tags}
                     placeholder="Tags"
                 />
-{Pretags?.map(item =>{
- <Pressable
- style={styles.buttonUpdate}
- onPress={() => { updateTodo() }}>
- <Text>{item?.name}</Text>
-</Pressable>
-})}
+  
+              <ScrollView horizontal ={true} style={{flexDirection:'row'}}>
+              {Pretags?.map(item =>{
+                        return(
+                            <>
+                            <Pressable onPress={() => { onChangeTags(item?.name) }} style={{height:50,width:120,borderRadius:5,backgroundColor:'grey',margin:10,justifyContent:'center',alignItems:'center'}}>
+                            <Text style={{color:'white'}}>{item?.name}</Text>
+                            </Pressable>
+     
+                            </>
+                        )
+                      
+                    })}
+              </ScrollView>
                     
-
-
                 
+
+
+
+
 
 
                 {!updating ? (
