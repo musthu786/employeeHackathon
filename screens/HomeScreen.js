@@ -2,13 +2,15 @@ import { View, Text, FlatList, StyleSheet, Pressable, TextInput, TouchableOpacit
 import React, { useState, useEffect, useContext } from 'react'
 import Firebase from '../config/firebase';
 import { firebase } from './config'
-import { FontAwesome } from "@expo/vector-icons";
+import { FontAwesome ,AntDesign } from "@expo/vector-icons";
 import { useNavigation } from '@react-navigation/native';
 import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
-import { IconButton } from '../components';
+
 const auth = Firebase.auth();
 const HomeScreen = () => {
   const [todos, setTodos] = useState([]);
+  const [todosExtra, setTodosExtra] = useState([]);
+  // const [liked, setLiked] = useState(false);
   const todoRef = firebase.firestore().collection('hackathon');
   const [addData, setAddData] = useState('');
   const navigation = useNavigation();
@@ -31,18 +33,21 @@ const HomeScreen = () => {
           const todos = []
           querySnapshot.forEach((doc) => {
             // alert(doc)
-            const { title, description, tags, timestamp } = doc.data()
+            const { title, description, tags, timestamp ,user ,like} = doc.data()
             todos.push({
               id: doc.id,
               title: title,
               description: description,
               tags: tags,
-              createdAt: timestamp
+              createdAt: timestamp,
+              user:user,
+              like:like,
+              // liked: 'false'
             })
           })
 
           setTodos(todos)
-          //console.log(users)
+       
         })
   }, [])
 
@@ -61,6 +66,41 @@ const HomeScreen = () => {
       })
   }
 
+  // like a todo from firestore db
+  const likeTodo = (data,like,type) => {
+
+    console.log(like, 'like value')
+    
+//Find index of specific object using findIndex method.    
+objIndex = todos.findIndex((obj => data.id == obj.id));
+
+//Log object to Console.
+console.log("Before update: ", todos[objIndex])
+
+//Update object's name property.
+todos[objIndex].liked = like === undefined ? true : !like
+
+//Log object to console again.
+console.log("After update: ", todos)
+setTodosExtra(todos)
+setTodos(todos)
+    todoRef
+      .doc(todos.id)
+      .update({
+        like : like + 1
+      })
+      .then(() => {
+        // show a successful alert
+        // alert("Deleted successfully");
+      })
+      .catch(error => {
+        // show an error alert
+        alert(error);
+      })
+  }
+
+
+
 
 
   return (
@@ -78,9 +118,10 @@ const HomeScreen = () => {
       <FlatList
         style={{ backgroundColor: 'white', margin: 10, marginTop: 10 }}
         data={todos}
+        extraData={todosExtra}
         numColumns={1}
         renderItem={({ item }) => (
-
+             
           <>
             <Pressable
               style={styles.container}
@@ -88,21 +129,30 @@ const HomeScreen = () => {
             >
 
               <View style={{ width: '100%', flexDirection: 'row' }}>
-                <View style={{ width: '30%', justifyContent: 'center', alignItems: 'center' }}>
-                  <FontAwesome name="trash-o"
+                <View style={{ width: '50%', justifyContent: 'flex-start', alignItems: 'flex-start',flexDirection:'row' }}>
+                  {item?.user === String(user.email)  &&(
+                    <FontAwesome name="trash-o"
                     color="red"
                     onPress={() => deleteTodo(item)}
                     style={styles.todoIcon} />
+                  )}
+                 
+              
                 </View>
-                <View style={{ width: '70%',  justifyContent: 'flex-start', alignItems: 'flex-end' }}>
-
-                  <View style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
+               
+                <View style={{ width: '50%',  justifyContent: 'flex-start', alignItems: 'flex-end' }}>
+                   <>
+                    <AntDesign onPress={() =>   likeTodo(item,item?.liked, item?.liked ? 'unlike' :'like') } name="like1" size={24} color={item?.liked ? "blue" : "white"} style={styles.todoIcon} />
+                    <Text>{item?.like} Likes</Text>
+                    </>
+                 
+                </View>
+              </View>
+              <View style={{ backgroundColor: 'red', justifyContent: 'center', alignItems: 'center' }}>
                     <Text style={styles.itemFeature}>
                       {item?.tags}
                     </Text>
                   </View>
-                </View>
-              </View>
 
               <Text style={styles.itemtitle}>
                 {item?.title}

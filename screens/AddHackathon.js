@@ -2,13 +2,14 @@ import React, { useState, useContext } from 'react'
 import { View, TextInput, StyleSheet, Text, Pressable, Keyboard, ActivityIndicator, } from "react-native"
 import { firebase } from './config'
 import { useNavigation } from '@react-navigation/native';
-
+import { AuthenticatedUserContext } from '../navigation/AuthenticatedUserProvider';
 const AddHackathon = () => {
     const todoRef = firebase.firestore().collection('hackathon');
     const [updating, onUpdating] = useState(false);
     const [title, onChangeTitle] = useState();
     const [description, onChangeDescription] = useState();
     const [tags, onChangeTags] = useState();
+    const { user } = useContext(AuthenticatedUserContext);
     const navigation = useNavigation();
 
     const Pretags = [
@@ -44,7 +45,9 @@ const AddHackathon = () => {
                 title: title,
                 description: description,
                 tags: tags,
-                createdAt: timestamp
+                user: user.email,
+                createdAt: timestamp,
+                like: 0
             };
             todoRef
                 .add(data)
